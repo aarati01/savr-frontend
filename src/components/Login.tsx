@@ -1,25 +1,61 @@
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { backendUrl } from "../config/constants";
 
 function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError("");
+
+    try {
+      const response = await fetch(`${backendUrl}api/user/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        localStorage.setItem("token", data.token);
+        navigate("/dashboard");
+      } else {
+        setError(data.message || "Login failed");
+      }
+    } catch (error) {
+      console.log(error);
+      setError("Something went wrong. Please try again.");
+    }
+  };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
       <h1 className="text-3xl font-semibold mb-5">Login</h1>
 
-      <form className="flex flex-col gap-5 mt-4 w-80">
+      <form onSubmit={handleLogin} className="flex flex-col gap-5 mt-4 w-80">
         <input
-          type="text"
-          placeholder="Username"
+          type="email"
+          placeholder="Email address"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:outline-none"
+          required
         />
 
         <div className="relative w-full">
           <input
             type={showPassword ? "text" : "password"}
             placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:outline-none pr-10"
+            required
           />
           <button
             type="button"
@@ -36,7 +72,10 @@ function Login() {
           className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:outline-none"
         />
 
-        <button className="bg-white text-black border border-gray-400 shadow-md rounded-sm p-2 hover:bg-gray-100 transition">
+        <button
+          type="submit"
+          className="bg-white text-black border border-gray-400 shadow-md rounded-sm p-2 hover:bg-gray-100 transition"
+        >
           LOGIN
         </button>
 
@@ -63,4 +102,3 @@ function Login() {
 }
 
 export default Login;
-

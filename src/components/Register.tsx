@@ -22,7 +22,8 @@ function Register() {
     }
 
     try {
-      const response = await fetch(`${backendUrl}api/user/register`, {
+      console.log("Sending registration request!");
+      const response = await fetch(`${backendUrl}api/user/register/ep`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
